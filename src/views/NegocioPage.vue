@@ -16,7 +16,7 @@
             <div class="box">
               <SparkLine
                 title="Ventas Hoy"
-                :value="'€1,250'"
+                :value="`€${ventasValor.toFixed(0)}`"
                 :chartOptions="ventasChartOptions"
                 :chartSeries="ventasChartSeries"
                 bgColor="gradient-green"
@@ -30,7 +30,7 @@
             <div class="box">
               <SparkLine
                 title="Pedidos"
-                :value="'87'"
+                :value="`${pedidosValor.toFixed(0)}`"
                 :chartOptions="pedidosChartOptions"
                 :chartSeries="pedidosChartSeries"
                 bgColor="gradient-blue"
@@ -44,7 +44,7 @@
             <div class="box">
               <SparkLine
                 title="Ticket Promedio"
-                :value="'€14.37'"
+                :value="`€${ticketValor.toFixed(2)}`"
                 :chartOptions="ticketChartOptions"
                 :chartSeries="ticketChartSeries"
                 bgColor="gradient-orange"
@@ -58,7 +58,7 @@
             <div class="box">
               <SparkLine
                 title="Clientes"
-                :value="'52'"
+                :value="`${clientesValor.toFixed(0)}`"
                 :chartOptions="clientesChartOptions"
                 :chartSeries="clientesChartSeries"
                 bgColor="gradient-pink"
@@ -94,6 +94,11 @@
               />
             </div>
           </ion-col>
+            <ion-col size="12" size-lg="6">
+              <div class="box">
+                <UiverseCard title="Mi KPI" value="98%" />
+              </div>
+            </ion-col>
         </ion-row>
       
       </ion-grid>
@@ -110,43 +115,53 @@ import EchartsGauge from '@/components/EcharstGauge.vue';
 import SparkLine from '@/components/SparkLine.vue';
 import ApexMixedChart from '@/components/ApexMixedChart.vue';
 import EchartsMap from '@/components/EcharstMap.vue';
-import { ref } from 'vue';
+import UiverseCard from '@/components/UiverseCard.vue';
+import { ref, onUnmounted } from 'vue';
 
 /* =========================
    📊 Sparkline data
 ========================= */
 
-const ventasChartOptions = {
-  chart: { sparkline: { enabled: true } },
-  stroke: { curve: 'smooth', width: 2 },
-  colors: ['#6be084'],
-  tooltip: { enabled: false }
-};
-const ventasChartSeries = [{ data: [120, 150, 180, 200, 170, 220, 250] }];
+// En NegocioPage.vue - reemplaza las series estáticas por estas
 
-const pedidosChartOptions = {
-  chart: { sparkline: { enabled: true } },
-  stroke: { curve: 'smooth', width: 2 },
-  colors: ['#0396FF'],
-  tooltip: { enabled: false }
-};
-const pedidosChartSeries = [{ data: [10, 12, 15, 13, 16, 18, 20] }];
+const ventasChartSeries = ref([{ data: [120, 150, 180, 200, 170, 220, 250] }]);
+const pedidosChartSeries = ref([{ data: [10, 12, 15, 13, 16, 18, 20] }]);
+const ticketChartSeries  = ref([{ data: [12.5, 13.2, 14.1, 13.8, 15.0, 14.7, 14.37] }]);
+const clientesChartSeries = ref([{ data: [30, 35, 40, 45, 50, 48, 52] }]);
 
-const ticketChartOptions = {
-  chart: { sparkline: { enabled: true } },
-  stroke: { curve: 'smooth', width: 2 },
-  colors: ['#e78f30'],
-  tooltip: { enabled: false }
-};
-const ticketChartSeries = [{ data: [12.5, 13.2, 14.1, 13.8, 15.0, 14.7, 14.37] }];
+// Valores actuales (los que muestran las tarjetas)
+const ventasValor   = ref(1250);
+const pedidosValor  = ref(87);
+const ticketValor   = ref(14.37);
+const clientesValor = ref(52);
 
-const clientesChartOptions = {
-  chart: { sparkline: { enabled: true } },
-  stroke: { curve: 'smooth', width: 2 },
-  colors: ['#EE9AE5'],
-  tooltip: { enabled: false }
+// Función que genera un nuevo valor con variación aleatoria
+const variar = (actual: number, min: number, max: number, delta: number) => {
+  const nuevo = actual + (Math.random() * delta * 2 - delta);
+  return Math.min(max, Math.max(min, nuevo));
 };
-const clientesChartSeries = [{ data: [30, 35, 40, 45, 50, 48, 52] }];
+
+// Actualiza una serie: quita el primer dato, añade uno nuevo al final
+const pushDato = (series: typeof ventasChartSeries, nuevoValor: number) => {
+  const datos = [...series.value[0].data.slice(1), Math.round(nuevoValor * 100) / 100];
+  series.value = [{ data: datos }];
+};
+
+// Intervalo cada 2 segundos
+const intervalo = setInterval(() => {
+  ventasValor.value   = variar(ventasValor.value,   500,  3000, 80);
+  pedidosValor.value  = variar(pedidosValor.value,  20,   150,  5);
+  ticketValor.value   = variar(ticketValor.value,   8,    25,   0.5);
+  clientesValor.value = variar(clientesValor.value, 10,   100,  3);
+
+  pushDato(ventasChartSeries,  ventasValor.value);
+  pushDato(pedidosChartSeries, pedidosValor.value);
+  pushDato(ticketChartSeries,  ticketValor.value);
+  pushDato(clientesChartSeries, clientesValor.value);
+}, 2000);
+
+// Limpiar al desmontar la página
+onUnmounted(() => clearInterval(intervalo));
 
 /* =========================
    📊 Mixed Chart data
@@ -169,9 +184,7 @@ const dataMixedChartSeries = ref([
     data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
   }
 ]);
-const gaugeDescargas = ref(70);
-const gaugeRendimiento = ref(45);
-const gaugeSatisfaccion = ref(90);
+const gaugeRendimiento = ref(55);
 
 const dataDownloadsEU = ref([
   { name: "Germany",     value: 15000 },
