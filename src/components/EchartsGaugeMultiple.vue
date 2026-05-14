@@ -44,20 +44,20 @@ watchEffect(() => {
       splitLine: { show: false },
       axisLabel: { show: false },
       detail: {
-        show: i === 0,
-        offsetCenter: [0, '20%'],
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#fff',
-        formatter: () => `${props.segments[0]?.value ?? 0}`
-      },
-      title: {
-        show: true,
-        offsetCenter: [0, `${60 + i * 18}%`],
-        color: seg.color,
-        fontSize: 11,
-        fontWeight: '500'
-      },
+  show: i === 0,
+  offsetCenter: [0, '5%'],    // número sube, deja espacio abajo
+  fontSize: 26,
+  fontWeight: 'bold',
+  color: '#fff',
+  formatter: () => `${props.segments[0]?.value ?? 0}`
+},
+title: {
+  show: true,
+  offsetCenter: [0, `${38 + i * 28}%`],  // 38% y 66%, bien separados
+  color: seg.color,
+  fontSize: 11,
+  fontWeight: '500'
+},
       data: [{ value: seg.value, name: seg.name }]
     };
   });
